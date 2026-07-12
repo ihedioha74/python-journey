@@ -27,6 +27,6 @@ average = voltage.mean()
 peak = voltage.max()
 variation = voltage.std()
 
-print(f"Average Voltage: {average:.2f}")
-print(f"Maximum Voltage: {peak}")
+print(f"Average Voltage: {average:.2f} V")
+print(f"Maximum Voltage: {peak} V")
 print(f"Standard Deviation of the Voltage: {variation:.2f}")
