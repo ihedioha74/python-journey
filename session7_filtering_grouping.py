@@ -21,9 +21,9 @@ print(high_demand)
 print()
 low_demand_40mw = df[df["load_mw"] < 40]
 high_demand_95mw = df[df["load_mw"] >= 95]
-print(f"Hours corresponding to load less than 40MW\n {low_demand_40mw.hour}")
+print(f"Hours corresponding to load less than 40MW\n {low_demand_40mw['hour']}")
 print()
-print(f"Hours corresponding to load greater than or equal 95MW\n {high_demand_95mw.hour}")
+print(f"Hours corresponding to load greater than or equal 95MW\n {high_demand_95mw['hour']}")
 print()
 ranked = df.sort_values("load_mw", ascending=True)
 print(ranked.head())      # .head() shows just the top 5 rows
