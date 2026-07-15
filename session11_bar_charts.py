@@ -6,7 +6,9 @@ Created on Wed Jul 15 21:04:09 2026
 @author: emmanuel_uchenna_ihedioha
 """
 
-import numpy as np
+
+import matplotlib.pyplot as plt
+import pandas as pd
 
 # Fake raw data: 3 readings per month, to show grouping
 raw = pd.DataFrame({
@@ -22,6 +24,7 @@ plt.title("Monthly Peak from Raw Data")
 plt.xlabel("Month")
 plt.ylabel("Peak Demand (MW)")
 plt.grid(True, axis="y")
+plt.savefig('Monthly_Peak_Demand.png', dpi=150, bbox_inches="tight")
 plt.show()
 print()
 monthly_average = raw.groupby("month")["load_mw"].mean()
@@ -32,4 +35,5 @@ plt.title("Monthly Average from Raw Data")
 plt.xlabel("Month")
 plt.ylabel("Average Demand (MW)")
 plt.grid(True, axis="y")
+plt.savefig('Monthly_Average_Demand.png', dpi=150, bbox_inches="tight")
 plt.show()
