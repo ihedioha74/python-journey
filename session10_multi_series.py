@@ -39,3 +39,4 @@ plt.legend()
 plt.grid(True)
 plt.savefig("weekday_weekend_comparison.png", dpi=150, bbox_inches="tight")
 plt.show()
+
