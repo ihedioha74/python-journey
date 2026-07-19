@@ -16,6 +16,7 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
 
 def make_output_name(input_filename, suffix, new_ext=None):
@@ -58,18 +59,28 @@ def analyze_load(df):
     })
     return summary
 
+def print_headline(summary):
+    """Print the single most important finding to the screen."""
+    # which feeder has the highest peak, and what is it?
+    top_feeder = summary["peak_mw"].idxmax()
+    top_peak = summary.loc[top_feeder, "peak_mw"]
+    top_lf = summary.loc[top_feeder, "load_factor"]
 
-def save_report(df, input_filename, output_dir="reports"):
-    """Save a cleaned CSV, a chart PNG, and a rich text summary into output_dir."""
+    print("\n" + "=" * 50)
+    print(f"  HEADLINE: Highest peak is {top_peak} MW on feeder {top_feeder}")
+    print(f"            (load factor {top_lf})")
+    print("=" * 50)
+
+
+def save_report(df, input_filename, output_dir="reports", filter_suffix=""):
+    """Save a cleaned CSV, chart PNG, and text summary, with an optional filter suffix in the names."""
     os.makedirs(output_dir, exist_ok=True)
     summary = analyze_load(df)
 
-    # 1. cleaned CSV
-    csv_path = os.path.join(output_dir, make_output_name(input_filename, "_cleaned"))
+    csv_path = os.path.join(output_dir, make_output_name(input_filename, filter_suffix + "_cleaned"))
     df.to_csv(csv_path, index=False)
 
-    # 2. chart PNG — peak vs average per feeder
-    png_path = os.path.join(output_dir, make_output_name(input_filename, "_chart", ".png"))
+    png_path = os.path.join(output_dir, make_output_name(input_filename, filter_suffix + "_chart", ".png"))
     summary[["peak_mw", "avg_mw"]].plot(kind="bar")
     plt.title("Peak vs Average Load per Feeder")
     plt.ylabel("Load (MW)")
@@ -78,32 +89,60 @@ def save_report(df, input_filename, output_dir="reports"):
     plt.savefig(png_path, dpi=150)
     plt.close()
 
-    # 3. rich text summary
-    txt_path = os.path.join(output_dir, make_output_name(input_filename, "_summary", ".txt"))
+    txt_path = os.path.join(output_dir, make_output_name(input_filename, filter_suffix + "_summary", ".txt"))
     with open(txt_path, "w") as f:
         f.write(f"Load Report for {input_filename}\n")
-        f.write(f"Rows after cleaning: {len(df)}\n\n")
+        f.write(f"Rows after cleaning/filtering: {len(df)}\n\n")
         f.write("Per-feeder summary:\n")
         f.write(summary.to_string())
+
     return csv_path, png_path, txt_path
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python load_report.py <filename>")
+    parser = argparse.ArgumentParser(
+        description="Clean a load CSV and produce a per-feeder report."
+    )
+    parser.add_argument("filename", help="the load CSV to process")
+    parser.add_argument("--feeder", help="focus on a single feeder (e.g. B)")
+    parser.add_argument("--min-load", type=float,
+                        help="only include readings at or above this MW value")
+    args = parser.parse_args()
+
+    print(f"Processing '{args.filename}'...")
+    clean = clean_load_data(args.filename)
+
+    # apply optional filters
+    if args.feeder:
+        clean = clean[clean["feeder"] == args.feeder.upper()]
+        print(f"Filtered to feeder {args.feeder.upper()}: {len(clean)} rows.")
+
+    if args.min_load is not None:
+        clean = clean[clean["load_mw"] >= args.min_load]
+        print(f"Filtered to load >= {args.min_load} MW: {len(clean)} rows.")
+
+    if clean.empty:
+        print("No data left after filtering. Nothing to report.")
         return
 
-    filename = sys.argv[1]
-    print(f"Processing '{filename}'...")
-    clean = clean_load_data(filename)
-    print(f"Cleaned data: {clean.shape[0]} rows remaining.")
-
-    csv_path, png_path, txt_path = save_report(clean, filename)
+   
+    suffix_parts = []
+    if args.feeder:
+        suffix_parts.append(f"_feeder_{args.feeder.upper()}")
+    if args.min_load is not None:
+        suffix_parts.append(f"_min{int(args.min_load)}")
+    filter_suffix = "".join(suffix_parts)
+    print(f"Analyzing {clean.shape[0]} rows.")
+# print the headline result to the screen
+    summary = analyze_load(clean)
+    print_headline(summary)
+    #print(f"Analyzing {clean.shape[0]} rows.")
+    csv_path, png_path, txt_path = save_report(clean, args.filename, filter_suffix=filter_suffix)
+    
     print("Saved:")
     print(f"  {csv_path}")
     print(f"  {png_path}")
     print(f"  {txt_path}")
     print("\nDone.")
-
 
 if __name__ == "__main__":
     main()
