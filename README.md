@@ -55,12 +55,14 @@ Combine filters — e.g. feeder D's heavy-load periods:
 python load_report.py messy_meter_data.csv --feeder D --min-load 100
 ```
 
-## About this project
+## About This Project
 
-This is a python programming journey of an Electrical Power Systems Engineer. 
-I started from a zero level without a GitHub account. The goal of this project 
-is to learn how to use python in solving any type of Electrical Power
-Engineering problem. 
+This repository documents the structured Python learning journey of an
+electrical power systems engineer, starting from zero — no prior Python,
+no GitHub account. Working through daily hands-on sessions, it grows from
+basic scripts into a complete, robust data-reporting tool, with every step
+committed to version control. The goal: to apply Python to real electrical
+power engineering problems, combining domain expertise with software skills. 
 
 ## Output
 
