@@ -98,6 +98,33 @@ def save_report(df, input_filename, output_dir="reports", filter_suffix=""):
 
     return csv_path, png_path, txt_path
 
+def build_prompt(summary):
+    """Turn a per-feeder summary table into a prompt for an AI to explain."""
+    table_text = summary.to_string()
+    prompt = f"""You are an expert power systems analyst. Below is a per-feeder \
+electrical load summary (values in MW, load_factor is average/peak).
+
+{table_text}
+
+In 3-4 sentences of plain, professional language, explain what this data reveals \
+about the feeders. Identify which feeder is most concerning and why, and mention \
+the load factor's practical meaning. Do not just restate the numbers — interpret them."""
+    return prompt
+
+
+def explain_load(summary, use_real_api=False):
+    """Generate a plain-language interpretation of a load summary.
+    use_real_api=False returns a mock response (no API cost)."""
+    prompt = build_prompt(summary)
+    if use_real_api:
+        raise NotImplementedError("Real API not wired up yet — coming in a later session.")
+    else:
+        return ("[AI-generated insight — mock mode]\n"
+                "This interpretation is a placeholder. Once the Anthropic API key is "
+                "configured, this section will contain a live, data-specific analysis "
+                "written by Claude based on the summary above.")
+    return prompt
+
 def main():
     parser = argparse.ArgumentParser(
         description="Clean a load CSV and produce a per-feeder report."
@@ -106,6 +133,8 @@ def main():
     parser.add_argument("--feeder", help="focus on a single feeder (e.g. B)")
     parser.add_argument("--min-load", type=float,
                         help="only include readings at or above this MW value")
+    parser.add_argument("--explain", action="store_true",
+                        help="add an AI-generated plain-language interpretation")
     args = parser.parse_args()
 
     print(f"Processing '{args.filename}'...")
@@ -135,6 +164,11 @@ def main():
 # print the headline result to the screen
     summary = analyze_load(clean)
     print_headline(summary)
+
+    if args.explain:
+        print("\n--- Interpretation ---")
+        print(explain_load(summary, use_real_api=False))
+        
     #print(f"Analyzing {clean.shape[0]} rows.")
     csv_path, png_path, txt_path = save_report(clean, args.filename, filter_suffix=filter_suffix)
     
