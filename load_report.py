@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
-
+import anthropic
 
 def make_output_name(input_filename, suffix, new_ext=None):
     """Turn 'march.csv' + '_cleaned' into 'march_cleaned.csv' (optionally new extension)."""
@@ -114,16 +114,26 @@ the load factor's practical meaning. Do not just restate the numbers — interpr
 
 def explain_load(summary, use_real_api=False):
     """Generate a plain-language interpretation of a load summary.
-    use_real_api=False returns a mock response (no API cost)."""
+    use_real_api=False returns a mock; True calls the Anthropic API."""
     prompt = build_prompt(summary)
+
     if use_real_api:
-        raise NotImplementedError("Real API not wired up yet — coming in a later session.")
+        # create a client — it automatically reads ANTHROPIC_API_KEY from the environment
+        client = anthropic.Anthropic()
+
+        message = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=300,
+            messages=[
+                {"role": "user", "content": prompt},
+            ],
+        )
+        return message.content[0].text
     else:
         return ("[AI-generated insight — mock mode]\n"
                 "This interpretation is a placeholder. Once the Anthropic API key is "
                 "configured, this section will contain a live, data-specific analysis "
                 "written by Claude based on the summary above.")
-    return prompt
 
 def main():
     parser = argparse.ArgumentParser(
@@ -167,7 +177,7 @@ def main():
 
     if args.explain:
         print("\n--- Interpretation ---")
-        print(explain_load(summary, use_real_api=False))
+        print(explain_load(summary, use_real_api=True))
         
     #print(f"Analyzing {clean.shape[0]} rows.")
     csv_path, png_path, txt_path = save_report(clean, args.filename, filter_suffix=filter_suffix)
