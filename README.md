@@ -29,6 +29,10 @@ Point it at a messy CSV of load readings and it will:
 
 - **matplotlib** — charts
 
+- **Anthropic** — AI Integration
+
+- **streamlit** — Web Application
+
 ## Usage
 
 Run a full report on a data file:
