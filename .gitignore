@@ -1,3 +1,6 @@
 .DS_Store
 __pycache__/
 reports/
+pmu_meter_readings.csv
+*.png
+load_duration_curve_feeder_B.png
