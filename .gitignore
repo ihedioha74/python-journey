@@ -4,3 +4,4 @@ reports/
 pmu_meter_readings.csv
 *.png
 load_duration_curve_feeder_B.png
+load_data_2025.csv
