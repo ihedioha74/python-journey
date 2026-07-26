@@ -40,20 +40,30 @@ def clean_load_data(filename):
 
     df = df.drop_duplicates()
     df["feeder"] = df["feeder"].str.upper()
-    df.loc[df["load_mw"] < 0, "load_mw"] = np.nan
-    df.loc[df["load_mw"] > 500, "load_mw"] = np.nan
+    df.loc[df["load_mw"] < 0.1, "load_mw"] = np.nan      # implausibly low (< 100 kW) → fault
+    df.loc[df["load_mw"] > 500, "load_mw"] = np.nan      # implausibly high → fault
     df = df.dropna(subset=["load_mw"])
     return df
 
-def analyze_load(df):
-    """Compute a per-feeder summary: peak, min, mean, count, load factor, time of peak."""
+def analyze_load(df, freq=None):
+    """Per-feeder load summary: peak, min, avg, load factor, reading count, peak time.
+
+    freq=None  → one row per feeder (whole period, as before).
+    freq="ME"  → one row per feeder per month (or "D" daily, "W" weekly, etc.).
+    """
     df = df.copy()
     df["timestamp"] = pd.to_datetime(df["timestamp"])
-    summary = df.groupby("feeder")["load_mw"].agg(["max", "min", "mean", "count"])
+
+    # choose the grouping: feeder alone, or feeder + time bucket
+    if freq is None:
+        grouper = df.groupby("feeder")["load_mw"]
+    else:
+        df = df.set_index("timestamp").sort_index()
+        grouper = df.groupby(["feeder", pd.Grouper(freq=freq)])["load_mw"]
+
+    summary = grouper.agg(["max", "min", "mean", "count"])
     summary["load_factor"] = (summary["mean"] / summary["max"]).round(3)
     summary = summary.round(2)
-    peak_times = df.loc[df.groupby("feeder")["load_mw"].idxmax()].set_index("feeder")["timestamp"]
-    summary["peak_time"] = peak_times
     summary = summary.rename(columns={
         "max": "peak_mw", "min": "min_mw", "mean": "avg_mw", "count": "readings",
     })
@@ -72,10 +82,10 @@ def print_headline(summary):
     print("=" * 50)
 
 
-def save_report(df, input_filename, output_dir="reports", filter_suffix=""):
+def save_report(df, summary, input_filename, output_dir="reports", filter_suffix=""):
     """Save a cleaned CSV, chart PNG, and text summary, with an optional filter suffix in the names."""
     os.makedirs(output_dir, exist_ok=True)
-    summary = analyze_load(df)
+    
 
     csv_path = os.path.join(output_dir, make_output_name(input_filename, filter_suffix + "_cleaned"))
     df.to_csv(csv_path, index=False)
@@ -145,6 +155,8 @@ def main():
                         help="only include readings at or above this MW value")
     parser.add_argument("--explain", action="store_true",
                         help="add an AI-generated plain-language interpretation")
+    parser.add_argument("--period", default=None,
+                        help="resample analysis by period: D (daily), W (weekly), ME (monthly)")
     args = parser.parse_args()
 
     print(f"Processing '{args.filename}'...")
@@ -172,15 +184,17 @@ def main():
     filter_suffix = "".join(suffix_parts)
     print(f"Analyzing {clean.shape[0]} rows.")
 # print the headline result to the screen
-    summary = analyze_load(clean)
-    print_headline(summary)
+    summary = analyze_load(clean, freq=args.period)
+    if args.period is None:
+        print_headline(summary)
+    save_report(clean, summary, args.filename, filter_suffix=filter_suffix)
 
     if args.explain:
         print("\n--- Interpretation ---")
         print(explain_load(summary, use_real_api=True))
         
     #print(f"Analyzing {clean.shape[0]} rows.")
-    csv_path, png_path, txt_path = save_report(clean, args.filename, filter_suffix=filter_suffix)
+    csv_path, png_path, txt_path = save_report(clean, summary, args.filename, filter_suffix=filter_suffix)
     
     print("Saved:")
     print(f"  {csv_path}")
