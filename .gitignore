@@ -6,3 +6,6 @@ pmu_meter_readings.csv
 load_duration_curve_feeder_B.png
 load_data_2025.csv
 grid_data_large.csv
+grid_data_huge.csv
+grid_data_huge.parquet
+*.parquet
