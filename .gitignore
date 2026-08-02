@@ -10,3 +10,5 @@ grid_data_huge.csv
 grid_data_huge.parquet
 *.parquet
 .venv/
+grid.db
+*.db
