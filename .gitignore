@@ -12,3 +12,4 @@ grid_data_huge.parquet
 .venv/
 grid.db
 *.db
+_test_*.csv
