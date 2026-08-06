@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Mon Jul 27 21:29:58 2026
 
@@ -17,6 +16,7 @@ Usage:  python weather_merge.py
 """
 import numpy as np
 import pandas as pd
+
 import load_report
 
 
@@ -44,8 +44,8 @@ def load_vs_temperature(load_csv="load_data_2025.csv"):
     weather = make_weather()
 
     n_before = len(system)
-    merged = system.merge(weather, on="date", how="left")   # left: never drop a load day
-    if len(merged) != n_before:                              # row-count safety check
+    merged = system.merge(weather, on="date", how="left")  # left: never drop a load day
+    if len(merged) != n_before:  # row-count safety check
         print(f"WARNING: row count changed {n_before} -> {len(merged)}")
 
     return merged

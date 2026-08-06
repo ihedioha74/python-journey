@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Tue Jul 28 21:19:16 2026
 
@@ -16,6 +15,7 @@ Assumes load_report.py and load_data_2025.csv are alongside this file.
 Usage:  python pivot_and_copies.py
 """
 import pandas as pd
+
 import load_report
 
 
@@ -39,7 +39,7 @@ def flag_high_load(clean, month, threshold=100):
     """
     clean = clean.copy()
     clean["month"] = pd.to_datetime(clean["timestamp"]).dt.month
-    subset = clean[clean["month"] == month].copy()      # <-- the fix
+    subset = clean[clean["month"] == month].copy()  # <-- the fix
     subset["flag"] = subset["load_mw"] > threshold
     return subset
 

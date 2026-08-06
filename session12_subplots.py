@@ -1,22 +1,57 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Thu Jul 16 20:42:38 2026
 
 @author: emmanuel_uchenna_ihedioha
 """
 
-#import pandas as pd
+# import pandas as pd
 import matplotlib.pyplot as plt
 
 # Panel 1 data: a day
 hours = range(24)
-load = [42, 39, 37, 36, 38, 45, 61, 78, 85, 88, 90, 91,
-        89, 87, 86, 88, 92, 96, 98, 95, 84, 70, 58, 48]
+load = [
+    42,
+    39,
+    37,
+    36,
+    38,
+    45,
+    61,
+    78,
+    85,
+    88,
+    90,
+    91,
+    89,
+    87,
+    86,
+    88,
+    92,
+    96,
+    98,
+    95,
+    84,
+    70,
+    58,
+    48,
+]
 
 # Panel 2 data: a year of monthly peaks
-months = ["Jan","Feb","Mar","Apr","May","Jun",
-          "Jul","Aug","Sep","Oct","Nov","Dec"]
+months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+]
 peak = [120, 118, 105, 95, 88, 92, 98, 100, 90, 96, 110, 125]
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
@@ -38,7 +73,7 @@ ax2.grid(True, axis="y")
 plt.tight_layout()
 plt.show()
 
-#plotting a figure of 2x2
+# plotting a figure of 2x2
 
 fig, axs = plt.subplots(2, 2, figsize=(14, 9))
 
@@ -58,7 +93,7 @@ axs[1, 0].set_xlabel("Load (MW)")
 axs[1, 0].set_ylabel("Count of hours")
 
 # Bottom-right: leave empty for now, or add a note
-axs[1, 1].axis("off")   # hide the unused panel
+axs[1, 1].axis("off")  # hide the unused panel
 
 plt.tight_layout()
 plt.savefig("dashboard.png", dpi=150, bbox_inches="tight")

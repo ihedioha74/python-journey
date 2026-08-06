@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Aug  1 22:09:31 2026
 
@@ -19,9 +18,11 @@ stable iff every eigenvalue has a negative real part).
 Usage:  python fft_harmonics.py
 """
 import os
-import numpy as np
+
 import matplotlib
-matplotlib.use("Agg")          # non-interactive backend: save files, no window
+import numpy as np
+
+matplotlib.use("Agg")  # non-interactive backend: save files, no window
 import matplotlib.pyplot as plt
 
 OUTDIR = "reports"
@@ -60,8 +61,7 @@ def thd(freqs, amps, fundamental_hz=50, n_harmonics=10):
     """Total Harmonic Distortion = sqrt(sum of harmonic^2) / fundamental."""
     fund = amplitude_at(freqs, amps, fundamental_hz)
     harmonics = [
-        amplitude_at(freqs, amps, fundamental_hz * k)
-        for k in range(2, n_harmonics + 1)
+        amplitude_at(freqs, amps, fundamental_hz * k) for k in range(2, n_harmonics + 1)
     ]
     return np.sqrt(np.sum(np.square(harmonics))) / fund
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Tue Aug  4 19:15:09 2026
 
@@ -24,13 +23,13 @@ Prerequisite: the API server must be running:
 Then run this app in another terminal:
     streamlit run dashboard.py
 """
-import requests
 import pandas as pd
+import requests
 import streamlit as st
 
 BASE = "http://127.0.0.1:8000"
-TIMEOUT = 5        # fast default for instant endpoints
-AI_TIMEOUT = 30    # generous: /explain waits on Claude (seconds, not ms)
+TIMEOUT = 5  # fast default for instant endpoints
+AI_TIMEOUT = 30  # generous: /explain waits on Claude (seconds, not ms)
 
 
 def get_json(path, params=None, timeout=TIMEOUT):
@@ -42,12 +41,16 @@ def get_json(path, params=None, timeout=TIMEOUT):
         resp.raise_for_status()
         return resp.json()
     except requests.exceptions.ConnectionError:
-        st.error("Cannot reach the API. Is the server running?  "
-                 "(uvicorn api:app --reload)")
+        st.error(
+            "Cannot reach the API. Is the server running?  "
+            "(uvicorn api:app --reload)"
+        )
         st.stop()
     except requests.exceptions.ReadTimeout:
-        st.error("The request timed out. The AI analysis can take a while — "
-                 "please try again.")
+        st.error(
+            "The request timed out. The AI analysis can take a while — "
+            "please try again."
+        )
         st.stop()
     except requests.exceptions.HTTPError as e:
         st.error(f"API error: {e}")

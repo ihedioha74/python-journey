@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Aug  5 20:10:58 2026
 
@@ -18,6 +17,7 @@ Run (through the venv's pytest, not Anaconda's):
 """
 import pandas as pd
 import pytest
+
 import load_report
 
 
@@ -28,29 +28,39 @@ def write_csv(tmp_path):
     tmp_path is a pytest-provided temp directory, unique per test and cleaned
     up automatically — no _test_input.csv litter in the project folder.
     """
+
     def _write(df):
         path = tmp_path / "input.csv"
         df.to_csv(path, index=False)
         return str(path)
+
     return _write
 
 
 def test_uppercases_feeder_names(write_csv):
-    csv = write_csv(pd.DataFrame({
-        "timestamp": ["2025-01-01 00:00:00", "2025-01-01 00:15:00"],
-        "load_mw": [50.0, 60.0],
-        "feeder": ["a", "B"],
-    }))
+    csv = write_csv(
+        pd.DataFrame(
+            {
+                "timestamp": ["2025-01-01 00:00:00", "2025-01-01 00:15:00"],
+                "load_mw": [50.0, 60.0],
+                "feeder": ["a", "B"],
+            }
+        )
+    )
     result = load_report.clean_load_data(csv)
     assert set(result["feeder"]) == {"A", "B"}
 
 
 def test_removes_out_of_range_loads(write_csv):
-    csv = write_csv(pd.DataFrame({
-        "timestamp": ["2025-01-01 00:00:00"] * 4,
-        "load_mw": [50.0, 0.05, 600.0, 80.0],   # 0.05 too low, 600 too high
-        "feeder": ["A", "A", "A", "A"],
-    }))
+    csv = write_csv(
+        pd.DataFrame(
+            {
+                "timestamp": ["2025-01-01 00:00:00"] * 4,
+                "load_mw": [50.0, 0.05, 600.0, 80.0],  # 0.05 too low, 600 too high
+                "feeder": ["A", "A", "A", "A"],
+            }
+        )
+    )
     result = load_report.clean_load_data(csv)
     assert len(result) == 2
     assert result["load_mw"].min() >= 0.1
@@ -58,11 +68,15 @@ def test_removes_out_of_range_loads(write_csv):
 
 
 def test_drops_duplicate_rows(write_csv):
-    csv = write_csv(pd.DataFrame({
-        "timestamp": ["2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-        "load_mw": [50.0, 50.0],
-        "feeder": ["A", "A"],
-    }))
+    csv = write_csv(
+        pd.DataFrame(
+            {
+                "timestamp": ["2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+                "load_mw": [50.0, 50.0],
+                "feeder": ["A", "A"],
+            }
+        )
+    )
     result = load_report.clean_load_data(csv)
     assert len(result) == 1
 

@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Fri Jul 17 20:39:14 2026
 
 @author: emmanuel_uchenna_ihedioha
 """
 
-import os
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
+import pandas as pd
 
 
 def clean_load_data(filename):
@@ -31,6 +28,8 @@ def clean_load_data(filename):
     df = df.dropna(subset=["load_mw"])
 
     return df
+
+
 print()
 result = clean_load_data("messy_load.csv")
 print(result)
@@ -49,6 +48,8 @@ with open("messy_load2.csv", "w") as f:
 result2 = clean_load_data("messy_load2.csv")
 print(result2)
 print()
+
+
 def summarize_load(df, title="Load Summary"):
     """Take a clean load DataFrame and plot average load per feeder."""
     averages = df.groupby("feeder")["load_mw"].mean()
@@ -62,5 +63,7 @@ def summarize_load(df, title="Load Summary"):
     plt.show()
 
     return averages
+
+
 clean = clean_load_data("messy_load.csv")
 summarize_load(clean, title="March Feeder Averages")

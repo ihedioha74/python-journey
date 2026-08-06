@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Aug  1 02:01:18 2026
 
@@ -23,8 +22,10 @@ Usage:  python polars_lazy_benchmark.py
 """
 import os
 import time
+
 import pandas as pd
 import polars as pl
+
 import generate_grid_data
 
 CSV = "grid_data_huge.csv"
@@ -56,18 +57,22 @@ def bench():
 
     # 2. lazy polars from CSV
     t0 = time.time()
-    _ = (pl.scan_csv(CSV)
-           .filter(pl.col("feeder") == FEEDER)
-           .select(pl.col("load_mw").mean())
-           .collect())
+    _ = (
+        pl.scan_csv(CSV)
+        .filter(pl.col("feeder") == FEEDER)
+        .select(pl.col("load_mw").mean())
+        .collect()
+    )
     print(f"polars + CSV:      {time.time()-t0:5.1f} s")
 
     # 3. lazy polars from Parquet
     t0 = time.time()
-    _ = (pl.scan_parquet(PARQUET)
-           .filter(pl.col("feeder") == FEEDER)
-           .select(pl.col("load_mw").mean())
-           .collect())
+    _ = (
+        pl.scan_parquet(PARQUET)
+        .filter(pl.col("feeder") == FEEDER)
+        .select(pl.col("load_mw").mean())
+        .collect()
+    )
     print(f"polars + Parquet:  {time.time()-t0:5.1f} s")
 
 

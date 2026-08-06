@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Jul 18 09:54:56 2026
 
@@ -11,13 +10,14 @@ load_report.py — Clean a load CSV and save a full report.
 Usage:  python load_report.py <filename>
 Outputs (into the 'reports' folder): cleaned CSV, chart PNG, text summary.
 """
-import sys
-import os
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import argparse
+import os
+
 import anthropic
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 
 def make_output_name(input_filename, suffix, new_ext=None):
     """Turn 'march.csv' + '_cleaned' into 'march_cleaned.csv' (optionally new extension)."""
@@ -31,7 +31,9 @@ def clean_load_data(filename):
     try:
         df = pd.read_csv(filename)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Could not find '{filename}'. Check the name and path.")
+        raise FileNotFoundError(
+            f"Could not find '{filename}'. Check the name and path."
+        )
 
     required = ["load_mw", "feeder"]
     missing = [col for col in required if col not in df.columns]
@@ -40,10 +42,13 @@ def clean_load_data(filename):
 
     df = df.drop_duplicates()
     df["feeder"] = df["feeder"].str.upper()
-    df.loc[df["load_mw"] < 0.1, "load_mw"] = np.nan      # implausibly low (< 100 kW) → fault
-    df.loc[df["load_mw"] > 500, "load_mw"] = np.nan      # implausibly high → fault
+    df.loc[df["load_mw"] < 0.1, "load_mw"] = (
+        np.nan
+    )  # implausibly low (< 100 kW) → fault
+    df.loc[df["load_mw"] > 500, "load_mw"] = np.nan  # implausibly high → fault
     df = df.dropna(subset=["load_mw"])
     return df
+
 
 def analyze_load(df, freq=None):
     """Per-feeder load summary: peak, min, avg, load factor, reading count, peak time.
@@ -64,10 +69,16 @@ def analyze_load(df, freq=None):
     summary = grouper.agg(["max", "min", "mean", "count"])
     summary["load_factor"] = (summary["mean"] / summary["max"]).round(3)
     summary = summary.round(2)
-    summary = summary.rename(columns={
-        "max": "peak_mw", "min": "min_mw", "mean": "avg_mw", "count": "readings",
-    })
+    summary = summary.rename(
+        columns={
+            "max": "peak_mw",
+            "min": "min_mw",
+            "mean": "avg_mw",
+            "count": "readings",
+        }
+    )
     return summary
+
 
 def print_headline(summary):
     """Print the single most important finding to the screen."""
@@ -85,12 +96,15 @@ def print_headline(summary):
 def save_report(df, summary, input_filename, output_dir="reports", filter_suffix=""):
     """Save a cleaned CSV, chart PNG, and text summary, with an optional filter suffix in the names."""
     os.makedirs(output_dir, exist_ok=True)
-    
 
-    csv_path = os.path.join(output_dir, make_output_name(input_filename, filter_suffix + "_cleaned"))
+    csv_path = os.path.join(
+        output_dir, make_output_name(input_filename, filter_suffix + "_cleaned")
+    )
     df.to_csv(csv_path, index=False)
 
-    png_path = os.path.join(output_dir, make_output_name(input_filename, filter_suffix + "_chart", ".png"))
+    png_path = os.path.join(
+        output_dir, make_output_name(input_filename, filter_suffix + "_chart", ".png")
+    )
     summary[["peak_mw", "avg_mw"]].plot(kind="bar")
     plt.title("Peak vs Average Load per Feeder")
     plt.ylabel("Load (MW)")
@@ -99,7 +113,9 @@ def save_report(df, summary, input_filename, output_dir="reports", filter_suffix
     plt.savefig(png_path, dpi=150)
     plt.close()
 
-    txt_path = os.path.join(output_dir, make_output_name(input_filename, filter_suffix + "_summary", ".txt"))
+    txt_path = os.path.join(
+        output_dir, make_output_name(input_filename, filter_suffix + "_summary", ".txt")
+    )
     with open(txt_path, "w") as f:
         f.write(f"Load Report for {input_filename}\n")
         f.write(f"Rows after cleaning/filtering: {len(df)}\n\n")
@@ -107,6 +123,7 @@ def save_report(df, summary, input_filename, output_dir="reports", filter_suffix
         f.write(summary.to_string())
 
     return csv_path, png_path, txt_path
+
 
 def build_prompt(summary):
     """Turn a per-feeder summary table into a prompt for an AI to explain."""
@@ -140,10 +157,13 @@ def explain_load(summary, use_real_api=False):
         )
         return message.content[0].text
     else:
-        return ("[AI-generated insight — mock mode]\n"
-                "This interpretation is a placeholder. Once the Anthropic API key is "
-                "configured, this section will contain a live, data-specific analysis "
-                "written by Claude based on the summary above.")
+        return (
+            "[AI-generated insight — mock mode]\n"
+            "This interpretation is a placeholder. Once the Anthropic API key is "
+            "configured, this section will contain a live, data-specific analysis "
+            "written by Claude based on the summary above."
+        )
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -151,12 +171,19 @@ def main():
     )
     parser.add_argument("filename", help="the load CSV to process")
     parser.add_argument("--feeder", help="focus on a single feeder (e.g. B)")
-    parser.add_argument("--min-load", type=float,
-                        help="only include readings at or above this MW value")
-    parser.add_argument("--explain", action="store_true",
-                        help="add an AI-generated plain-language interpretation")
-    parser.add_argument("--period", default=None,
-                        help="resample analysis by period: D (daily), W (weekly), ME (monthly)")
+    parser.add_argument(
+        "--min-load", type=float, help="only include readings at or above this MW value"
+    )
+    parser.add_argument(
+        "--explain",
+        action="store_true",
+        help="add an AI-generated plain-language interpretation",
+    )
+    parser.add_argument(
+        "--period",
+        default=None,
+        help="resample analysis by period: D (daily), W (weekly), ME (monthly)",
+    )
     args = parser.parse_args()
 
     print(f"Processing '{args.filename}'...")
@@ -175,7 +202,6 @@ def main():
         print("No data left after filtering. Nothing to report.")
         return
 
-   
     suffix_parts = []
     if args.feeder:
         suffix_parts.append(f"_feeder_{args.feeder.upper()}")
@@ -183,7 +209,7 @@ def main():
         suffix_parts.append(f"_min{int(args.min_load)}")
     filter_suffix = "".join(suffix_parts)
     print(f"Analyzing {clean.shape[0]} rows.")
-# print the headline result to the screen
+    # print the headline result to the screen
     summary = analyze_load(clean, freq=args.period)
     if args.period is None:
         print_headline(summary)
@@ -192,15 +218,18 @@ def main():
     if args.explain:
         print("\n--- Interpretation ---")
         print(explain_load(summary, use_real_api=True))
-        
-    #print(f"Analyzing {clean.shape[0]} rows.")
-    csv_path, png_path, txt_path = save_report(clean, summary, args.filename, filter_suffix=filter_suffix)
-    
+
+    # print(f"Analyzing {clean.shape[0]} rows.")
+    csv_path, png_path, txt_path = save_report(
+        clean, summary, args.filename, filter_suffix=filter_suffix
+    )
+
     print("Saved:")
     print(f"  {csv_path}")
     print(f"  {png_path}")
     print(f"  {txt_path}")
     print("\nDone.")
+
 
 if __name__ == "__main__":
     main()

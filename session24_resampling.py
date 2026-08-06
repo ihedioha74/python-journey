@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Thu Jul 23 19:04:21 2026
 
@@ -15,9 +14,8 @@ rolling averages, and the load duration curve.
 
 Usage:  python session24_resampling.py
 """
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 FILENAME = "messy_meter_data_v1.csv"
 FEEDER = "B"
@@ -51,17 +49,20 @@ print(daily_wrong)
 one_feeder = df[df["feeder"] == FEEDER]["load_mw"]
 
 print(f"\n--- Feeder {FEEDER}: daily mean vs daily max ---")
-print(pd.DataFrame({
-    "daily_mean": one_feeder.resample("D").mean().round(2),
-    "daily_max": one_feeder.resample("D").max(),
-}))
+print(
+    pd.DataFrame(
+        {
+            "daily_mean": one_feeder.resample("D").mean().round(2),
+            "daily_max": one_feeder.resample("D").max(),
+        }
+    )
+)
 
 
 # ------------------------------------------------- correct: group first, then resample
-daily = (df.groupby("feeder")["load_mw"]
-           .resample("D")
-           .agg(["max", "mean", "min"])
-           .round(2))
+daily = (
+    df.groupby("feeder")["load_mw"].resample("D").agg(["max", "mean", "min"]).round(2)
+)
 daily["load_factor"] = (daily["mean"] / daily["max"]).round(3)
 
 print("\n--- Daily summary per feeder ---")
@@ -75,10 +76,12 @@ print(daily)
 
 # ------------------------------------------------- hour-of-day load profile
 # A DatetimeIndex exposes .hour, .day, .dayofweek, .month directly.
-by_hour = (df.groupby([df["feeder"], df.index.hour])["load_mw"]
-             .mean()
-             .unstack(level=0)
-             .round(1))
+by_hour = (
+    df.groupby([df["feeder"], df.index.hour])["load_mw"]
+    .mean()
+    .unstack(level=0)
+    .round(1)
+)
 by_hour.index.name = "hour"
 
 print("\n--- Average load by hour of day ---")

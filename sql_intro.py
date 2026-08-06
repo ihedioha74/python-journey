@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sun Aug  2 02:04:51 2026
 
@@ -20,7 +19,9 @@ not repeated in every query. Then every query inherits trustworthy data.
 Usage:  python sql_intro.py   (expects load_data_2025.csv + load_report.py)
 """
 import sqlite3
+
 import pandas as pd
+
 import load_report
 
 DB = "grid.db"
@@ -36,9 +37,9 @@ def load_clean_to_db(csv, conn, n=1000):
 
 def show_schema(conn):
     """Inspect the database's own structure — never query blind."""
-    tables = pd.read_sql(
-        "SELECT name FROM sqlite_master WHERE type='table'", conn
-    )["name"].tolist()
+    tables = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table'", conn)[
+        "name"
+    ].tolist()
     schema = pd.read_sql(f"PRAGMA table_info({TABLE})", conn)
     return tables, schema[["name", "type"]]
 

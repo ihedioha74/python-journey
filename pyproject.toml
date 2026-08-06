@@ -1,0 +1,6 @@
+
+
+[tool.ruff]
+   # Files are run with `python file.py`, not as executables, so the shebang
+   # executable-bit check does not apply to this project.
+   lint.ignore = ["EXE001"]

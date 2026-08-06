@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Aug  1 03:36:14 2026
 
@@ -25,11 +24,13 @@ def build_metadata(n_feeders=30):
     """A small per-feeder lookup table to join against (region + voltage)."""
     feeders = [f"F{i:02d}" for i in range(n_feeders)]
     regions = ["Nord", "Süd", "Ost", "West"]
-    return pl.DataFrame({
-        "feeder": feeders,
-        "region": [regions[i % 4] for i in range(n_feeders)],   # cycle via modulo
-        "voltage_kv": [[10, 20][i % 2] for i in range(n_feeders)],
-    })
+    return pl.DataFrame(
+        {
+            "feeder": feeders,
+            "region": [regions[i % 4] for i in range(n_feeders)],  # cycle via modulo
+            "voltage_kv": [[10, 20][i % 2] for i in range(n_feeders)],
+        }
+    )
 
 
 def demo_join(df, metadata):
@@ -52,12 +53,11 @@ def demo_window(joined):
 def demo_dynamic(df):
     """Daily peak & mean per feeder — group first, then resample (Session 24)."""
     ts = df.with_columns(pl.col("timestamp").str.to_datetime()).sort("timestamp")
-    return (
-        ts.group_by_dynamic("timestamp", every="1d", group_by="feeder")
-          .agg([
-              pl.col("load_mw").mean().alias("avg_mw"),
-              pl.col("load_mw").max().alias("peak_mw"),
-          ])
+    return ts.group_by_dynamic("timestamp", every="1d", group_by="feeder").agg(
+        [
+            pl.col("load_mw").mean().alias("avg_mw"),
+            pl.col("load_mw").max().alias("peak_mw"),
+        ]
     )
 
 
@@ -70,9 +70,11 @@ def main():
 
     dev = demo_window(joined)
     print("\nBiggest deviations from each feeder's own baseline:")
-    print(dev.sort("deviation", descending=True)
-             .select(["timestamp", "feeder", "load_mw", "feeder_avg", "deviation"])
-             .head())
+    print(
+        dev.sort("deviation", descending=True)
+        .select(["timestamp", "feeder", "load_mw", "feeder_avg", "deviation"])
+        .head()
+    )
 
     daily = demo_dynamic(df)
     print(f"\nDaily rollup: {daily.height:,} rows")

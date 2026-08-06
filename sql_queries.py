@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sun Aug  2 18:18:15 2026
 
@@ -23,7 +22,9 @@ Writing (cursor.execute + commit):
 Usage:  python sql_queries.py   (expects load_data_2025.csv + load_report.py)
 """
 import sqlite3
+
 import pandas as pd
+
 import load_report
 
 DB = "grid.db"
@@ -52,7 +53,8 @@ def feeder_above(conn, feeder, threshold):
     """Compound filter: one feeder's readings above a threshold."""
     return pd.read_sql(
         f"SELECT * FROM {TABLE} WHERE feeder = ? AND load_mw > ?",
-        conn, params=(feeder, threshold),
+        conn,
+        params=(feeder, threshold),
     )
 
 

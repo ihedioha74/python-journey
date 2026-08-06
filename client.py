@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Mon Aug  3 21:49:53 2026
 
@@ -21,13 +20,13 @@ Usage:  python client.py
 import requests
 
 BASE = "http://127.0.0.1:8000"
-TIMEOUT = 5   # seconds — never wait forever for a server that may be down
+TIMEOUT = 5  # seconds — never wait forever for a server that may be down
 
 
 def get_json(path, params=None):
     """GET a path and return parsed JSON, raising a clear error on failure."""
     resp = requests.get(BASE + path, params=params, timeout=TIMEOUT)
-    resp.raise_for_status()          # turn HTTP 4xx/5xx into an exception
+    resp.raise_for_status()  # turn HTTP 4xx/5xx into an exception
     return resp.json()
 
 
@@ -53,8 +52,10 @@ def main():
         print("\nPer-feeder summary (fetched over HTTP):")
         for f in feeders:
             s = feeder_summary(f)
-            print(f"  {f}: peak {s['peak_load']:.1f} MW, "
-                  f"avg {s['avg_load']:.1f} MW, {s['readings']} readings")
+            print(
+                f"  {f}: peak {s['peak_load']:.1f} MW, "
+                f"avg {s['avg_load']:.1f} MW, {s['readings']} readings"
+            )
 
     except requests.exceptions.ConnectionError:
         print("ERROR: could not reach the API. Is the server running?")

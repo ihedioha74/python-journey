@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Jul 29 21:56:29 2026
 
@@ -22,7 +21,6 @@ Key rules, up front:
 Assumes load_report.py and load_data_2025.csv are alongside this file.
 Usage:  python session29_multiindex.py
 """
-import pandas as pd
 import load_report
 
 
@@ -35,13 +33,13 @@ def build_monthly():
 def demo_selection(monthly):
     """Selecting from a multi-index: outer level, exact row, inner level."""
     # all of feeder A's months — .loc on the OUTER level (drops that level)
-    feeder_a = monthly.loc["A"]                     # -> DataFrame (12 rows)
+    feeder_a = monthly.loc["A"]  # -> DataFrame (12 rows)
 
     # one exact (feeder, month) row — pin BOTH levels with a tuple
-    a_july = monthly.loc[("A", "2025-07-31")]       # -> Series (one row)
+    a_july = monthly.loc[("A", "2025-07-31")]  # -> Series (one row)
 
     # all feeders for one month — INNER level, so .loc fails; use .xs
-    july_all = monthly.xs("2025-07-31", level="timestamp")   # -> DataFrame (4 rows)
+    july_all = monthly.xs("2025-07-31", level="timestamp")  # -> DataFrame (4 rows)
 
     return feeder_a, a_july, july_all
 
@@ -49,7 +47,7 @@ def demo_selection(monthly):
 def demo_reshape(monthly):
     """Swapping which level is outer, and flattening for merge/export."""
     # put timestamp outer, feeder inner — now .loc[date] gives all feeders
-    swapped = monthly.swaplevel().sort_index()      # sort so the new outer groups
+    swapped = monthly.swaplevel().sort_index()  # sort so the new outer groups
 
     # drop the hierarchy: levels become ordinary columns (needed for merge/CSV)
     flat = monthly.reset_index()
@@ -68,7 +66,9 @@ def main():
     print(feeder_a.head(3))
     print("\n=== monthly.loc[('A','2025-07-31')] — one row -> Series ===")
     print(a_july)
-    print("\n=== monthly.xs('2025-07-31', level='timestamp') — inner level, all feeders ===")
+    print(
+        "\n=== monthly.xs('2025-07-31', level='timestamp') — inner level, all feeders ==="
+    )
     print(july_all)
 
     swapped, flat = demo_reshape(monthly)

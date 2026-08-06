@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Jul 25 20:41:07 2026
 
@@ -22,16 +21,18 @@ Usage:  python generate_load_data.py
 import numpy as np
 import pandas as pd
 
-SEED = 42                      # fixed seed -> reproducible data
+SEED = 42  # fixed seed -> reproducible data
 YEAR = 2025
-BASE = {"A": 60, "B": 75, "C": 55, "D": 70}   # per-feeder floor (MW)
+BASE = {"A": 60, "B": 75, "C": 55, "D": 70}  # per-feeder floor (MW)
 
 
 def generate():
     rng = np.random.default_rng(SEED)
 
     # --- time backbone: every feeder reports at every 15-min timestamp ---
-    timestamps = pd.date_range(f"{YEAR}-01-01 00:00", f"{YEAR}-12-31 23:45", freq="15min")
+    timestamps = pd.date_range(
+        f"{YEAR}-01-01 00:00", f"{YEAR}-12-31 23:45", freq="15min"
+    )
     index = pd.MultiIndex.from_product(
         [timestamps, list(BASE)], names=["timestamp", "feeder"]
     )
@@ -39,15 +40,15 @@ def generate():
 
     # helper time components
     hour = df["timestamp"].dt.hour + df["timestamp"].dt.minute / 60
-    dayofweek = df["timestamp"].dt.dayofweek        # 0=Mon .. 6=Sun
+    dayofweek = df["timestamp"].dt.dayofweek  # 0=Mon .. 6=Sun
     dayofyear = df["timestamp"].dt.dayofyear
 
     # --- the layers ---
     base = df["feeder"].map(BASE)
-    daily = 35 * np.cos((hour - 19) / 24 * 2 * np.pi)          # peak 19:00, trough ~07:00
-    weekly = np.where(dayofweek >= 5, -12, +5)                 # weekends lower
+    daily = 35 * np.cos((hour - 19) / 24 * 2 * np.pi)  # peak 19:00, trough ~07:00
+    weekly = np.where(dayofweek >= 5, -12, +5)  # weekends lower
     seasonal = 20 * np.cos((dayofyear - 1) / 365 * 2 * np.pi)  # winter peak (day 1)
-    noise = rng.normal(0, 6, len(df))                          # +/-6 MW wobble
+    noise = rng.normal(0, 6, len(df))  # +/-6 MW wobble
 
     df["load_mw"] = (base + daily + weekly + seasonal + noise).round(2)
     df["feeder"] = df["feeder"].astype(str)
@@ -55,11 +56,11 @@ def generate():
 
     # --- realistic messiness, so cleaning tools have work to do ---
     n = len(data)
-    miss = rng.choice(n, int(0.02 * n), replace=False)         # 2% missing
+    miss = rng.choice(n, int(0.02 * n), replace=False)  # 2% missing
     data.loc[miss, "load_mw"] = np.nan
-    fault = rng.choice(n, 20, replace=False)                    # sentinel fault codes
+    fault = rng.choice(n, 20, replace=False)  # sentinel fault codes
     data.loc[fault, "load_mw"] = 9999
-    case = rng.choice(n, int(0.01 * n), replace=False)         # case-inconsistent labels
+    case = rng.choice(n, int(0.01 * n), replace=False)  # case-inconsistent labels
     data.loc[case, "feeder"] = data.loc[case, "feeder"].str.lower()
 
     return data

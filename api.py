@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sun Aug  2 18:38:22 2026
 
@@ -28,9 +27,10 @@ Endpoints:
     GET /explain?feeder=B      summary + a plain-language AI explanation
 """
 import sqlite3
+
 import pandas as pd
-from fastapi import FastAPI, HTTPException
 from anthropic import Anthropic
+from fastapi import FastAPI, HTTPException
 
 app = FastAPI(title="Grid Load API", version="2.0")
 
@@ -116,4 +116,5 @@ def explain_feeder(feeder: str):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8000)

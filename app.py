@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Jul 22 19:27:23 2026
 
 @author: emmanuel_uchenna_ihedioha
 """
 
-import streamlit as st
-import pandas as pd
 import matplotlib.pyplot as plt
+import streamlit as st
+
 import load_report
 
 st.title("Load Report Tool")
@@ -28,7 +27,11 @@ if uploaded is not None:
     # headline metrics
     top_feeder = summary["peak_mw"].idxmax()
     col1, col2 = st.columns(2)
-    col1.metric("Highest peak", f"{summary.loc[top_feeder, 'peak_mw']} MW", f"Feeder {top_feeder}")
+    col1.metric(
+        "Highest peak",
+        f"{summary.loc[top_feeder, 'peak_mw']} MW",
+        f"Feeder {top_feeder}",
+    )
     col2.metric("Load factor", f"{summary.loc[top_feeder, 'load_factor']}")
 
     # chart

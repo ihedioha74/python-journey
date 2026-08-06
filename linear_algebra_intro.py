@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Aug  1 13:40:36 2026
 
@@ -43,17 +42,19 @@ def bus_voltages(Y, I):
 
 def main():
     # --- dot product: three-phase power ---
-    V3 = np.array([230, 231, 229])      # volts
-    I3 = np.array([10, 12, 11])         # amps
+    V3 = np.array([230, 231, 229])  # volts
+    I3 = np.array([10, 12, 11])  # amps
     print("Three-phase power:", three_phase_power(V3, I3), "W")
 
     # --- a small symmetric admittance-like matrix ---
-    Y = np.array([
-        [2, 1, 0],
-        [1, 3, 1],
-        [0, 1, 2],
-    ])
-    V = np.array([1, 2, 3])             # bus voltages
+    Y = np.array(
+        [
+            [2, 1, 0],
+            [1, 3, 1],
+            [0, 1, 2],
+        ]
+    )
+    V = np.array([1, 2, 3])  # bus voltages
 
     # forward: voltages -> currents
     I = bus_currents(Y, V)
