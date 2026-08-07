@@ -26,11 +26,15 @@ Endpoints:
     GET /summary?feeder=B      per-feeder summary (avg/peak/min/count)
     GET /explain?feeder=B      summary + a plain-language AI explanation
 """
+import os
 import sqlite3
 
 import pandas as pd
 from anthropic import Anthropic
 from fastapi import FastAPI, HTTPException
+
+
+import load_report
 
 app = FastAPI(title="Grid Load API", version="2.0")
 
@@ -39,6 +43,43 @@ DB = "grid.db"
 # Anthropic client created ONCE at module level (reads ANTHROPIC_API_KEY from
 # the environment), reused across all requests — not rebuilt per call.
 claude = Anthropic()
+
+
+
+DB = "grid.db"
+SEED_CSV = "grid_seed.csv"
+
+
+def seed_database():
+    """Build grid.db from the committed seed CSV if it isn't already present.
+
+    Idempotent: does nothing if the readings table already exists, so it is
+    safe to call on every startup. This makes the deployed app self-sufficient
+    — it provisions its own data rather than depending on a database file that
+    is (correctly) gitignored and therefore absent on a fresh clone.
+    """
+    if os.path.exists(DB):
+        conn = sqlite3.connect(DB)
+        try:
+            tables = pd.read_sql(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='readings'",
+                conn,
+            )
+            if not tables.empty:
+                return  # already seeded
+        finally:
+            conn.close()
+
+    df = load_report.clean_load_data(SEED_CSV)
+    conn = sqlite3.connect(DB)
+    try:
+        df.to_sql("readings", conn, if_exists="replace", index=False)
+    finally:
+        conn.close()
+    print(f"Seeded {DB} with {len(df)} rows from {SEED_CSV}")
+
+
+seed_database()  # runs once at import/startup
 
 
 def query(sql, params=()):
