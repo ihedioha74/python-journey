@@ -5,24 +5,21 @@ Created on Tue Aug  4 19:15:09 2026
 @author: emmanuel_uchenna_ihedioha
 """
 
-"""
-dashboard.py — Streamlit frontend for the Grid Load API.
+# dashboard.py — Streamlit frontend for the Grid Load API.
+#
+# The frontend that only PRESENTS. It owns no data and no logic: every number
+# comes from the FastAPI backend over HTTP, exactly like client.py — but the
+# results drive widgets instead of print(). Three-layer architecture:
+#
+#     grid.db (data)  ->  api.py (backend/logic)  ->  dashboard.py (presentation)
+#
+# The AI explanation is fetched ON DEMAND (behind a button), because /explain
+# calls Claude and takes a few seconds — fast numbers always, slow AI only when
+# asked. That also means each /explain call is a real (billable) API request.
+#
+# Prerequisite: the API server must be running:  uvicorn api:app --reload
+# Then run this app in another terminal:          streamlit run dashboard.py
 
-The frontend that only PRESENTS. It owns no data and no logic: every number
-comes from the FastAPI backend over HTTP, exactly like client.py — but the
-results drive widgets instead of print(). Three-layer architecture:
-
-    grid.db (data)  ->  api.py (backend/logic)  ->  dashboard.py (presentation)
-
-The AI explanation is fetched ON DEMAND (behind a button), because /explain
-calls Claude and takes a few seconds — fast numbers always, slow AI only when
-asked. That also means each /explain call is a real (billable) API request.
-
-Prerequisite: the API server must be running:
-    uvicorn api:app --reload
-Then run this app in another terminal:
-    streamlit run dashboard.py
-"""
 import os
 
 import requests
