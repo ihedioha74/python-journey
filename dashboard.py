@@ -23,11 +23,17 @@ Prerequisite: the API server must be running:
 Then run this app in another terminal:
     streamlit run dashboard.py
 """
-import pandas as pd
+import os
+
 import requests
+import pandas as pd
 import streamlit as st
 
-BASE = "http://127.0.0.1:8000"
+# The API base URL. Locally it defaults to your local server; when deployed,
+# set API_BASE in the environment to the live API's public URL. Same code,
+# both environments — no editing needed to switch.
+BASE = os.environ.get("API_BASE", "http://127.0.0.1:8000")
+
 TIMEOUT = 5  # fast default for instant endpoints
 AI_TIMEOUT = 30  # generous: /explain waits on Claude (seconds, not ms)
 
